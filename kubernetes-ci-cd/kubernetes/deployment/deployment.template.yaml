@@ -1,0 +1,37 @@
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      terminationGracePeriodSeconds: 90
+      containers:
+      - image: $PRIVATE_REGISTRY_PATH/$TENANCY_NAME/$REPO_NAME/$APP_NAME:${WERCKER_GIT_BRANCH}-${WERCKER_GIT_COMMIT}
+        name: webapp
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /cities.json
+            port: 5000
+            scheme: HTTP
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /cities.json
+            port: 5000
+            scheme: HTTP
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+      imagePullSecrets:
+      - name: ocir-secret
